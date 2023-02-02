@@ -13,7 +13,7 @@ app.set("views", path.join(__dirname, "views")); // set para decir en q carpeta 
 
 const PORT = 4246;
 
-// test middleware
+// test middleware - crea un loggin con el metodo, el endpoint y el retardo
 app.use((req, res, next) => {
   const start = Date.now();
   next(); //sin la llamada a next() se interrumpe el flujo hacia el endpoint
@@ -31,6 +31,7 @@ app.get("/", (req, res) => {
     caption: "aaaaaaaaaaaaa q frioo locoo",
   });
 }); //se renderiza el template de hbs en la carpeta views con estas propiedades
+
 app.use("/friends", friendsRouter); //"mounting" de friends router
 app.use("/messages", messagesRouter);
 

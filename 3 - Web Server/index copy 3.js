@@ -22,6 +22,8 @@ const friends = [
 
 server.on("request", (req, res) => {
   const items = req.url.split("/"); //requestPath /friends/2
+  console.log(req.url);
+  console.log(items);
 
   //POST REQUEST
   if (req.method === "POST" && items[1] === "friends") {
