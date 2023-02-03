@@ -42,11 +42,11 @@
         class="ml-5 p-2"
       >
         <option
-          :value="planet.kepler_name"
+          :value="planet.keplerName"
           v-for="planet in planets"
           :key="planet.kepid"
         >
-          {{ planet.kepler_name }}
+          {{ planet.keplerName }}
         </option>
       </select>
     </div>
