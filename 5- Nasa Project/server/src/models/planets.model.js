@@ -1,7 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 const { parse } = require("csv-parse");
-const results = [];
+
+const planets = require("./planets.mongo");
 
 function isHabitablePlanet(planet) {
   return (
@@ -26,16 +27,36 @@ function loadPlanetsData() {
           columns: true, //devuelve un array de js objects
         })
       )
-      .on("data", (data) => {
-        if (isHabitablePlanet(data)) results.push(data);
+      .on("data", async (data) => {
+        if (isHabitablePlanet(data)) {
+          //results.push(data)
+          //
+          //TODO replace below create with upsert
+          //insert + update = upsert  solo inserta data en la db si no existe
+          // await planets.updateOne(
+          //   {
+          //     keplerName: data.kepler_name,
+          //     kepid: data.kepid,
+          //   }, //si no existe, lo agrega, y si existe, updatea con el segundo argumento
+          //   {
+          //     keplerName: data.kepler_name,
+          //     kepid: data.kepid,
+          //   },
+          //   {
+          //     upsert: true, //solo se agrega si existe
+          //   }
+          // );
+          savePlanet(data);
+        }
       })
       .on("error", (error) => {
         console.log(error);
         reject(error);
       })
-      .on("end", () => {
+      .on("end", async () => {
+        const countPLanetsFound = (await getAllPlanets()).length;
         console.log(
-          `We found ${results.length} posible habitable planets! Oh my good Lord!`
+          `We found ${countPLanetsFound} posible habitable planets! Oh my good Lord!`
         );
         console.log("Done!");
         resolve();
@@ -43,9 +64,30 @@ function loadPlanetsData() {
   });
 }
 
-function getAllPlanets() {
-  console.log("los planetas son" + results);
-  return results;
+async function getAllPlanets() {
+  //console.log("los planetas son" + results);
+  //return results;
+  return await planets.find({}); //objeto vacio es igual a todos, sino es un filtro
+}
+
+async function savePlanet(planet) {
+  try {
+    await planets.updateOne(
+      {
+        keplerName: planet.kepler_name,
+        kepid: planet.kepid,
+      }, //si no existe, lo agrega, y si existe, updatea con el segundo argumento
+      {
+        keplerName: planet.kepler_name,
+        kepid: planet.kepid,
+      },
+      {
+        upsert: true, //solo se agrega si existe
+      }
+    );
+  } catch (err) {
+    console.log(`Could not save planet ${err}`);
+  }
 }
 
 module.exports = {

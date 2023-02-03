@@ -20,6 +20,8 @@ mongoose.connection.on("error", (err) => {
   console.error(err);
 });
 
+mongoose.set("strictQuery", false);
+
 //await no puede ser usado sin una function async por eso se crea la function startserver y se mete el await dentro
 async function startServer() {
   await mongoose.connect(MONGO_URL);
