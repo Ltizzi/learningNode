@@ -1,6 +1,7 @@
-// const launches = require("./launches.mongo");
+const launchesRepo = require("./launches.mongo");
+const planetsRepo = require("./planets.mongo");
 
-const launches = new Map();
+const launches = new Map(); //version sin persistencia
 
 let latestFlightNumber = 100;
 
@@ -15,16 +16,43 @@ const launch = {
   success: true,
 };
 
-launches.set(launch.flightNumber, launch);
+//saveLaunch(launch);
 
-function getAllLaunches() {
-  return Array.from(launches.values());
+//launches.set(launch.flightNumber, launch);  //version sin persistencia
+
+async function getAllLaunches() {
+  // return Array.from(launches.values());
+  return await launchesRepo.find(
+    {},
+    {
+      _id: 0, //excluyendo fields
+      __v: 0,
+    }
+  );
 }
 
 function getLaunch(id) {
   let launchie = launches.get(id);
   console.log(launchie);
   return launchie;
+}
+
+async function saveLaunch(launch) {
+  const planet = planetsRepo.findOne({
+    keplerName: launch.destination,
+  });
+  if (!planet) {
+    throw new Error("No matching planet was found!");
+  }
+  await launchesRepo.updateOne(
+    {
+      flightNumber: launch.flightNumber,
+    },
+    launch,
+    {
+      upsert: true,
+    }
+  );
 }
 
 function addNewLaunch(launch) {

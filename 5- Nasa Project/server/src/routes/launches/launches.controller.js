@@ -5,9 +5,9 @@ const {
   getLaunch,
 } = require("../../models/launches.model");
 
-function httpGetAllLaunches(req, res) {
+async function httpGetAllLaunches(req, res) {
   // return res.status(200).json(Array.from(launches.values()));
-  return res.status(200).json(getAllLaunches());
+  return res.status(200).json(await getAllLaunches());
 }
 
 function httpAddNewLaunch(req, res) {

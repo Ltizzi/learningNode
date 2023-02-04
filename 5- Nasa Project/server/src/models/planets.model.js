@@ -67,7 +67,13 @@ function loadPlanetsData() {
 async function getAllPlanets() {
   //console.log("los planetas son" + results);
   //return results;
-  return await planets.find({}); //objeto vacio es igual a todos, sino es un filtro
+  return await planets.find(
+    {},
+    {
+      __v: 0, //excluyen los fields generados por mongo y mongoose
+      _id: 0,
+    }
+  ); //objeto vacio es igual a todos, sino es un filtro
 }
 
 async function savePlanet(planet) {
