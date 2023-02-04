@@ -51,9 +51,10 @@ async function getLatestFlightNumber() {
 }
 
 async function saveLaunch(launch) {
-  const planet = planetsRepo.findOne({
+  const planet = await planetsRepo.findOne({
     keplerName: launch.destination,
   });
+
   if (!planet) {
     throw new Error("No matching planet was found!");
   }
