@@ -33,10 +33,13 @@ async function getAllLaunches() {
   );
 }
 
-function getLaunch(id) {
-  let launchie = launches.get(id);
-  console.log(launchie);
-  return launchie;
+async function getLaunch(id) {
+  // let launchie = launches.get(id);
+  // console.log(launchie);
+  // return launchie;
+  return await launchesRepo.findOne({
+    flightNumber: id,
+  });
 }
 
 async function getLatestFlightNumber() {
@@ -88,13 +91,23 @@ async function scheduleNewLaunch(launch) {
 //   );
 // }
 
-function deleteLaunch(id) {
-  const launch = getLaunch(id);
-  console.log(launch);
-  launch.upcoming = false;
-  launch.success = false;
-  launches.set(launch.flightNumber, launch);
-  return launch;
+async function deleteLaunch(id) {
+  //const launch = getLaunch(id);
+  // console.log(launch);
+  // launch.upcoming = false;
+  // launch.success = false;
+  // launches.set(launch.flightNumber, launch);
+  // return launch;
+  const aborted = await launchesRepo.updateOne(
+    {
+      flightNumber: id,
+    },
+    {
+      upcoming: false,
+      success: false,
+    }
+  );
+  return aborted.acknowledged === true && aborted.modifiedCount === 1;
 }
 
 module.exports = {
