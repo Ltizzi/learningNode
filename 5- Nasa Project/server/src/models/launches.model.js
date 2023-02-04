@@ -3,7 +3,9 @@ const planetsRepo = require("./planets.mongo");
 
 const launches = new Map(); //version sin persistencia
 
-let latestFlightNumber = 100;
+const DEFAULT_FLIGHT_NUMBER = 100;
+
+//let latestFlightNumber = 100; //version sin persistencia
 
 const launch = {
   flightNumber: 100,
@@ -37,6 +39,14 @@ function getLaunch(id) {
   return launchie;
 }
 
+async function getLatestFlightNumber() {
+  const latestLaunch = await launchesRepo.findOne().sort("-flightNumber"); //query que obtiene el ultimo launch
+  if (!latestLaunch) {
+    return DEFAULT_FLIGHT_NUMBER;
+  }
+  return latestLaunch.flightNumber;
+}
+
 async function saveLaunch(launch) {
   const planet = planetsRepo.findOne({
     keplerName: launch.destination,
@@ -44,7 +54,7 @@ async function saveLaunch(launch) {
   if (!planet) {
     throw new Error("No matching planet was found!");
   }
-  await launchesRepo.updateOne(
+  await launchesRepo.findOneAndUpdate(
     {
       flightNumber: launch.flightNumber,
     },
@@ -54,19 +64,29 @@ async function saveLaunch(launch) {
     }
   );
 }
-
-function addNewLaunch(launch) {
-  latestFlightNumber++;
-  launches.set(
-    latestFlightNumber,
-    Object.assign(launch, {
-      flightNumber: latestFlightNumber,
-      customers: ["c755", "NASA"],
-      upcoming: true,
-      success: true,
-    })
-  );
+async function scheduleNewLaunch(launch) {
+  const newFlightNumber = (await getLatestFlightNumber()) + 1;
+  const newLaunch = Object.assign(launch, {
+    success: true,
+    upcoming: true,
+    customers: ["c755", "NASA"],
+    flightNumber: newFlightNumber,
+  });
+  saveLaunch(newLaunch);
 }
+
+// function addNewLaunch(launch) {
+//   latestFlightNumber++;
+//   launches.set(
+//     latestFlightNumber,
+//     Object.assign(launch, {
+//       flightNumber: latestFlightNumber,
+//       customers: ["c755", "NASA"],
+//       upcoming: true,
+//       success: true,
+//     })
+//   );
+// }
 
 function deleteLaunch(id) {
   const launch = getLaunch(id);
@@ -79,7 +99,8 @@ function deleteLaunch(id) {
 
 module.exports = {
   getAllLaunches,
-  addNewLaunch,
+  // addNewLaunch,
+  scheduleNewLaunch,
   deleteLaunch,
   getLaunch,
 };
