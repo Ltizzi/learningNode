@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-black h-screen pt-10">
+  <div class="bg-black h-auto pt-10">
     <table
       class="table table-auto bg-black w-10/12 text-sky-300 items-center m-auto"
     >
