@@ -1,4 +1,4 @@
-const URL = "http://localhost:4246";
+const URL = "http://localhost:4246/v1";
 
 export async function getPlanets() {
   try {

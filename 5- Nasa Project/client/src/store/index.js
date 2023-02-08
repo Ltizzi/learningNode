@@ -14,7 +14,7 @@ const store = createStore({
   actions: {
     async fetchPlanets({ commit }) {
       try {
-        const data = axios.get("http://localhost:4246/planets");
+        const data = axios.get("http://localhost:4246/v1/planets");
         commit("SET_PLANETS", data.data);
       } catch (err) {
         alert(err);
