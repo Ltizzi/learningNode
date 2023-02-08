@@ -8,16 +8,16 @@ const DEFAULT_FLIGHT_NUMBER = 100;
 
 //let latestFlightNumber = 100; //version sin persistencia
 
-const launch = {
-  flightNumber: 100, //flight_number
-  mission: "Kepler Exploration X", //name
-  rocket: "Explorer IS1", // rocket.name
-  launchDate: new Date("December 27, 2030"), //date_local
-  destination: "Kepler-442 b", //not applicable
-  customers: ["NASA", "ZTM"], //payload.customers
-  upcoming: true, //upcoming
-  success: true, //success
-};
+// const launch = {
+//   flightNumber: 100, //flight_number
+//   mission: "Kepler Exploration X", //name
+//   rocket: "Explorer IS1", // rocket.name
+//   launchDate: new Date("December 27, 2030"), //date_local
+//   destination: "Kepler-442 b", //not applicable
+//   customers: ["NASA", "ZTM"], //payload.customers
+//   upcoming: true, //upcoming
+//   success: true, //success
+// };
 
 //saveLaunch(launch);
 
@@ -32,8 +32,9 @@ async function getAllLaunches(skip, limit) {
         _id: 0, //excluyendo fields
         __v: 0,
       }
-    ) //pagination setup
-    .skip(skip)
+    )
+    .sort({ flightNumber: 1 }) //sort de la paginacion, atributo con 1 o -1 para asc o desc
+    .skip(skip) //pagination setup
     .limit(limit);
 }
 
