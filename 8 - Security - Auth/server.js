@@ -6,7 +6,7 @@ const helmet = require("helmet");
 const passport = require("passport");
 const { Strategy } = require("passport-google-oauth20");
 const cookieSession = require("cookie-session");
-const { verify } = require("crypto");
+//const { verify } = require("crypto");
 
 require("dotenv").config();
 
@@ -27,17 +27,47 @@ const AUTH_OPTIONS = {
 
 //se puede usar para verificar password y usuario en otro tipo de auth
 function verifyCallback(accessToken, refreshToken, profile, done) {
-  console.log("Google profile:", profile);
+  console.log("Google profile:", profile.id);
   done(null, profile);
+}
+
+function checkLoggedIn(req, res, next) {
+  console.log("Current user is:", req.user);
+  const isLoggedIn = req.isAuthenticated() && req.user; //isAuthenticated es una built in function de passport
+  if (!isLoggedIn) {
+    return res.status(401).json({
+      error: "You must log in!",
+    });
+  }
+  next();
 }
 
 //configurar la estrategia del passport
 passport.use(new Strategy(AUTH_OPTIONS, verifyCallback));
 
+//serializacion es guardar la data del user en la cookie y deserialización es cargar la data de la cookie
+//ejemplos más básicos que no buscan data ni graban nada de la db
+//save the session to the cookie
+passport.serializeUser((user, done) => {
+  const cookieData = {
+    id: user.id,
+    email: user._json.email,
+  };
+  done(null, cookieData);
+});
+
+//read the session from the cookie
+passport.deserializeUser((obj, done) => {
+  //se puede hacer queries a la db en este paso
+  console.log(obj);
+  done(null, obj);
+});
+
 const app = express();
 
 app.use(helmet()); //right up the top
 
+//SESSION COOKIE configuration
 app.use(
   cookieSession({
     name: "session",
@@ -47,16 +77,8 @@ app.use(
 );
 
 app.use(passport.initialize()); //sets up the passport session
+app.use(passport.session()); //authentiquea la session q entra del client
 
-function checkLoggedIn(req, res, next) {
-  const isLoggedIn = true; //TODO
-  if (!isLoggedIn) {
-    return res.status(401).json({
-      error: "You must log in!",
-    });
-  }
-  next();
-}
 //pre auth
 app.get(
   "/auth/google",
@@ -72,7 +94,7 @@ app.get(
   passport.authenticate("google", {
     failureRedirect: "/failure", //url si failea el login
     successRedirect: "/",
-    session: false,
+    session: true, //set to true by default
   }),
   (req, res) => {
     //res.redirect()
@@ -81,7 +103,10 @@ app.get(
 );
 
 //generic logout endpoint
-app.get("/auth/logout", (req, res) => {});
+app.get("/auth/logout", (req, res) => {
+  req.logout(); //function de passport, remueve req.user de la request y limpia cualquier login sesion
+  return res.redirect("/");
+});
 
 //se puede pasar middlewared en los endpoints y funcionan en secuencia, se pueden agregar varios
 app.get("/secret", checkLoggedIn, (req, res) => {
