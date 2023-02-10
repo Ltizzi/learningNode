@@ -5,6 +5,8 @@ const express = require("express");
 const helmet = require("helmet");
 const passport = require("passport");
 const { Strategy } = require("passport-google-oauth20");
+const cookieSession = require("cookie-session");
+const { verify } = require("crypto");
 
 require("dotenv").config();
 
@@ -13,6 +15,8 @@ const PORT = process.env.PORT;
 const config = {
   CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+  COOKIE_KEY_1: process.env.COOKIE_SECRET_KEY_1,
+  COOKIE_KEY_2: process.env.COOKIE_SECRET_KEY_2,
 };
 
 const AUTH_OPTIONS = {
@@ -34,7 +38,15 @@ const app = express();
 
 app.use(helmet()); //right up the top
 
-app.use(passport.initialize());
+app.use(
+  cookieSession({
+    name: "session",
+    maxAge: 24 * 60 * 60 * 1000,
+    keys: [config.COOKIE_KEY_1, config.COOKIE_KEY_2], //cookie signed by server with secret keys
+  })
+);
+
+app.use(passport.initialize()); //sets up the passport session
 
 function checkLoggedIn(req, res, next) {
   const isLoggedIn = true; //TODO
